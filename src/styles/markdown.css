@@ -1,0 +1,174 @@
+/* ===== Markdown editor (dark editing side) ===== */
+.md-editor {
+  display: flex;
+  flex-direction: column;
+}
+.md-render {
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.6;
+  word-break: break-word;
+}
+.md-render h1,
+.md-render h2,
+.md-render h3,
+.md-render h4 {
+  color: var(--text);
+  margin: 8px 0 4px;
+  line-height: 1.3;
+  font-weight: 700;
+}
+.md-render h3 {
+  font-size: 1.05em;
+}
+.md-render p {
+  margin: 4px 0;
+}
+.md-render ul,
+.md-render ol {
+  margin: 4px 0;
+  padding-left: 18px;
+}
+.md-render li {
+  margin: 2px 0;
+}
+.md-render code {
+  background: #2a2d37;
+  padding: 0 4px;
+  border-radius: 3px;
+  font-family: Menlo, Consolas, monospace;
+  font-size: 0.9em;
+}
+.md-render a {
+  color: var(--accent);
+}
+.md-render blockquote {
+  border-left: 3px solid var(--border);
+  margin: 4px 0;
+  padding-left: 10px;
+  color: var(--text-dim);
+}
+.md-render hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 8px 0;
+}
+
+.md-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--panel-3);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 4px;
+  margin-bottom: 8px;
+}
+.md-tool {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+  width: 28px;
+  height: 28px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+}
+.md-tool:hover {
+  border-color: var(--accent);
+}
+.md-spacer {
+  flex: 1;
+}
+.md-done {
+  background: var(--accent);
+  border: none;
+  color: #fff;
+  padding: 5px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+}
+.md-textarea {
+  width: 100%;
+  resize: vertical;
+  font-family: Menlo, Consolas, "Courier New", monospace;
+  font-size: 12px;
+  line-height: 1.55;
+  min-height: 160px;
+}
+.md-live-label {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin: 10px 0 4px;
+  letter-spacing: 0.06em;
+}
+.md-edit-btn {
+  width: 100%;
+  margin-top: 8px;
+}
+
+/* ===== Markdown render inside the resume preview (light page) ===== */
+/* 关键：font-size:1em 继承 .resume-doc 的 --base-font-size，
+   这样「排版设置 → 基础字号」能影响 Markdown 模块；
+   标题层级用 em 相对值，可随基础字号一起缩放。 */
+.resume-doc .md-render {
+  color: #374151;
+  font-size: 1em;
+  line-height: inherit;
+}
+.resume-doc .md-render h1,
+.resume-doc .md-render h2,
+.resume-doc .md-render h3,
+.resume-doc .md-render h4 {
+  color: #1a1d23;
+  margin: 8px 0 3px;
+  line-height: 1.3;
+  font-weight: 700;
+}
+.resume-doc .md-render h1 {
+  font-size: 1.32em;
+}
+.resume-doc .md-render h2 {
+  font-size: 1.18em;
+}
+.resume-doc .md-render h3 {
+  font-size: 1.08em;
+}
+.resume-doc .md-render h4 {
+  font-size: 1em;
+}
+.resume-doc .md-render p {
+  margin: 4px 0;
+}
+.resume-doc .md-render ul,
+.resume-doc .md-render ol {
+  margin: 4px 0;
+  padding-left: 18px;
+}
+.resume-doc .md-render li {
+  margin: 2px 0;
+}
+.resume-doc .md-render code {
+  background: #f3f4f6;
+  padding: 0 4px;
+  border-radius: 3px;
+  font-family: Menlo, monospace;
+  font-size: 0.9em;
+}
+.resume-doc .md-render a {
+  color: var(--theme-color);
+  text-decoration: none;
+}
+.resume-doc .md-render blockquote {
+  border-left: 3px solid #ddd;
+  margin: 4px 0;
+  padding-left: 10px;
+  color: #555;
+}
+.resume-doc .md-render hr {
+  border: none;
+  border-top: 1px solid #eee;
+  margin: 8px 0;
+}

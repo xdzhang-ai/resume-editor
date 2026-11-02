@@ -1,0 +1,270 @@
+/* ===== Resume document base ===== */
+.resume-doc {
+  font-family: var(--font-family);
+  font-size: var(--base-font-size);
+  line-height: var(--line-height);
+  color: #1f2329;
+  background: #fff;
+}
+.resume-page {
+  background: #fff;
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.22);
+}
+
+/* Hidden layer used only to measure the full flowing document height. */
+.resume-measure-wrap {
+  position: absolute;
+  top: 0;
+  left: -10000px;
+  visibility: hidden;
+  pointer-events: none;
+}
+/* Each page clips a window [a, b) of the full document. The clip is inset by
+   the page margin, so every page's first block sits at the top margin. */
+.resume-clip {
+  position: absolute;
+  overflow: hidden;
+}
+.resume-slice {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.module {
+  break-inside: avoid;
+  page-break-inside: avoid;
+  margin-bottom: 16px;
+}
+.module--break {
+  break-inside: auto;
+  page-break-inside: auto;
+}
+.module:last-child {
+  margin-bottom: 0;
+}
+
+.module-title {
+  display: inline-block;
+}
+.module-body {
+  margin-top: 2px;
+}
+
+/* ===== Entries (education / work / projects) ===== */
+.entries .entry {
+  margin-bottom: 10px;
+}
+.entries .entry:last-child {
+  margin-bottom: 0;
+}
+.entry-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+}
+.entry-title {
+  font-weight: 600;
+  color: #1a1d23;
+}
+.entry-date {
+  color: #6b7280;
+  font-size: 0.88em;
+  white-space: nowrap;
+}
+.entry-loc {
+  color: #6b7280;
+  font-size: 0.88em;
+  font-weight: 400;
+}
+.entry-sub {
+  color: #4b5563;
+  font-size: 0.92em;
+  margin-top: 2px;
+}
+.entry-desc {
+  margin-top: 3px;
+  color: #374151;
+}
+.entry-tech {
+  margin-top: 3px;
+  font-size: 0.88em;
+  color: #374151;
+}
+.entry-role {
+  font-weight: 600;
+  color: #374151;
+}
+.entry-md {
+  margin-top: 5px;
+}
+.bullets {
+  margin: 5px 0 0;
+  padding-left: 18px;
+}
+.bullets li {
+  margin-bottom: 3px;
+  color: #374151;
+}
+
+/* ===== Skills ===== */
+.skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+}
+.skill-item {
+  font-size: 0.95em;
+  color: #374151;
+}
+.skill-cat {
+  font-weight: 600;
+  color: #1a1d23;
+}
+
+/* ===== Custom ===== */
+.custom-item {
+  margin-bottom: 8px;
+}
+.custom-heading {
+  font-weight: 600;
+  color: #1a1d23;
+}
+.custom-content {
+  white-space: pre-wrap;
+  color: #374151;
+  margin-top: 2px;
+}
+
+/* ===== Personal ===== */
+.personal-name {
+  font-size: 1.9em;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.2;
+}
+.personal-title {
+  color: var(--theme-color);
+  font-size: 1.05em;
+  margin-top: 3px;
+  font-weight: 500;
+}
+.personal-contact {
+  color: #5b6470;
+  font-size: 0.88em;
+  margin-top: 5px;
+}
+.personal-meta {
+  color: #5b6470;
+  font-size: 0.86em;
+  margin-top: 3px;
+}
+.personal-summary {
+  margin-top: 7px;
+  color: #374151;
+}
+
+/* ================= TEMPLATE: modern ================= */
+.tpl-modern .module-header {
+  display: flex;
+  align-items: center;
+  border-left: 4px solid var(--theme-color);
+  background-color: #eef3ff; /* fallback */
+  background-color: color-mix(in srgb, var(--theme-color) 12%, #fff);
+  padding: 5px 10px;
+  margin-bottom: 8px;
+  border-radius: 2px;
+}
+.tpl-modern .module-title {
+  color: var(--theme-color);
+  font-weight: 700;
+  font-size: 1.1em;
+  letter-spacing: 0.04em;
+}
+.no-accent.tpl-modern .module-header {
+  background: transparent;
+  border-left: none;
+  padding-left: 0;
+}
+
+/* ================= TEMPLATE: minimal ================= */
+.tpl-minimal .module-header {
+  border-bottom: 1px solid #cfcfcf;
+  padding-bottom: 5px;
+  margin-bottom: 9px;
+}
+.tpl-minimal .module-title {
+  font-weight: 600;
+  font-size: 1.05em;
+  color: #222;
+  letter-spacing: 0.06em;
+}
+.tpl-minimal .personal-name,
+.tpl-minimal .personal-title {
+  color: #111;
+}
+
+/* ================= TEMPLATE: classic ================= */
+.tpl-classic {
+  font-family: Georgia, "Times New Roman", "Songti SC", "SimSun", serif;
+}
+.tpl-classic .module-header {
+  border-bottom: 2px double var(--theme-color);
+  padding-bottom: 4px;
+  margin-bottom: 9px;
+}
+.tpl-classic .module-title {
+  font-weight: 700;
+  font-size: 1.1em;
+  color: var(--theme-color);
+  letter-spacing: 0.05em;
+}
+.tpl-classic .personal-name {
+  text-align: center;
+  color: #1a1a1a;
+}
+.tpl-classic .personal-title {
+  text-align: center;
+}
+.tpl-classic .personal-contact {
+  text-align: center;
+}
+
+/* ================= TEMPLATE: compact ================= */
+.tpl-compact {
+  font-size: calc(var(--base-font-size) * 0.95);
+}
+.tpl-compact .module {
+  margin-bottom: 12px;
+}
+.tpl-compact .module-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 7px;
+}
+.tpl-compact .module-header::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  background: var(--theme-color);
+  border-radius: 2px;
+  flex: none;
+}
+.tpl-compact .module-title {
+  font-weight: 700;
+  font-size: 1.05em;
+  color: #1a1a1a;
+}
+.tpl-compact .skills {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 22px;
+}
+.tpl-compact .entry {
+  margin-bottom: 7px;
+}
