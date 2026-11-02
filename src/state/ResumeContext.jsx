@@ -8,7 +8,6 @@ import {
   useEffect,
   useRef
 } from 'react'
-import { sampleResume } from './sampleData.js'
 import { createModule, createItem, normalizeResume } from './moduleTypes.js'
 import * as db from '../db/resumeDb.js'
 
@@ -117,7 +116,8 @@ function reducer(state, action) {
       return action.resume
 
     case 'RESET':
-      return sampleResume
+      // 重置为一份空白简历（不再回退到任何示例内容）
+      return db.blankResumeData()
 
     default:
       return state
@@ -125,7 +125,8 @@ function reducer(state, action) {
 }
 
 export function ResumeProvider({ children }) {
-  const [state, dispatch] = useReducer(reducer, sampleResume)
+  // 初始状态为空白简历：编辑器只在打开某份简历后才渲染，这里仅是占位，不内置示例数据。
+  const [state, dispatch] = useReducer(reducer, undefined, () => db.blankResumeData())
   const [resumes, setResumes] = useState([])
   const [activeId, setActiveId] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -136,12 +137,12 @@ export function ResumeProvider({ children }) {
     stateRef.current = state
   }, [state])
 
-  // 首次加载：从后端恢复列表（库为空则用示例建第一份）。不预载具体简历内容，由首页负责“进入”。
+  // 首次加载：从后端恢复列表（库为空则展示空状态，不再自动播种示例数据）。不预载具体简历内容，由首页负责“进入”。
   useEffect(() => {
     let cancelled = false
     ;(async () => {
       try {
-        const { resumes, activeId, data } = await db.bootstrap(sampleResume)
+        const { resumes, activeId, data } = await db.bootstrap()
         if (cancelled) return
         setResumes(resumes)
         setActiveId(activeId || null)

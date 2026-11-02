@@ -73,41 +73,12 @@ export function blankResumeData() {
   }
 }
 
-// 初始化：拉取列表；若数据库为空，则用示例数据建第一份（显示名跟随个人模块姓名）。
-// 返回 { resumes, activeId, data }，首页不需要预载某份内容，故 data 为 null。
-// 双重保险防重复播种：① 模块级“共享 Promise”保证单次函数调用链只执行一次；
-// ② localStorage 标记防止 Vite HMR / 模块多实例导致 bootstrapPromise 被重置后再次播种。
-const SEED_KEY = '__resume_studio_seeded__'
-let bootstrapPromise = null
-function seedMarked() {
-  try {
-    return localStorage.getItem(SEED_KEY) === '1'
-  } catch {
-    return false
-  }
-}
-function markSeeded() {
-  try {
-    localStorage.setItem(SEED_KEY, '1')
-  } catch {
-    /* ignore */
-  }
-}
-export async function bootstrap(seedData) {
-  if (!bootstrapPromise) {
-    bootstrapPromise = (async () => {
-      let list = normalizeList(await req('/resumes'))
-      if (!list.length && !seedMarked()) {
-        const seedName =
-          seedData?.modules?.find((m) => m.type === 'personal')?.data?.name || '未命名'
-        const rec = await create(seedName, seedData, true)
-        list = rec.list
-        markSeeded()
-      }
-      return { resumes: list, activeId: null, data: null }
-    })()
-  }
-  return bootstrapPromise
+// 初始化：只拉取列表，不做任何示例数据播种。
+// 库为空时首页展示空状态，由用户自行「新建简历」。
+// 返回 { resumes, activeId, data }，首页不需要预载某份内容，故 activeId / data 恒为 null。
+export async function bootstrap() {
+  const resumes = normalizeList(await req('/resumes'))
+  return { resumes, activeId: null, data: null }
 }
 
 export async function getList() {
