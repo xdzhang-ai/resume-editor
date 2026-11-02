@@ -9,6 +9,7 @@ import {
   useRef
 } from 'react'
 import { createModule, createItem, normalizeResume } from './moduleTypes.js'
+import { useAuth } from './AuthContext.jsx'
 import * as db from '../db/resumeDb.js'
 
 const ResumeContext = createContext(null)
@@ -125,6 +126,7 @@ function reducer(state, action) {
 }
 
 export function ResumeProvider({ children }) {
+  const { user, loading: authLoading } = useAuth()
   // 初始状态为空白简历：编辑器只在打开某份简历后才渲染，这里仅是占位，不内置示例数据。
   const [state, dispatch] = useReducer(reducer, undefined, () => db.blankResumeData())
   const [resumes, setResumes] = useState([])
@@ -137,9 +139,33 @@ export function ResumeProvider({ children }) {
     stateRef.current = state
   }, [state])
 
-  // 首次加载：从后端恢复列表（库为空则展示空状态，不再自动播种示例数据）。不预载具体简历内容，由首页负责“进入”。
+  // ---- 显式保存（替代自动保存，编辑后需点“保存”才落库）----
+  // 脏标记追踪两类改动：① 各模块内容/顺序/增删；② 全局排版设置(meta)。
+  const [dirty, setDirty] = useState({}) // { [moduleId]: true }
+  const [metaDirty, setMetaDirty] = useState(false)
+  // 仅顺序/模块增删这类结构性变化会令“保存全部”和离开确认生效，但不再把每个老模块标脏。
+  const [orderDirty, setOrderDirty] = useState(false)
+  const savedRef = useRef(null) // { order, modules, meta }
+
+  // 登录后加载该用户的简历列表；登出时清空，避免上一个账号的数据残留在内存里。
   useEffect(() => {
+    if (authLoading) return
+
+    if (!user) {
+      setResumes([])
+      setActiveId(null)
+      setError(null)
+      setLoading(false)
+      savedRef.current = null
+      setDirty({})
+      setMetaDirty(false)
+      setOrderDirty(false)
+      dispatch({ type: 'RESET' })
+      return
+    }
+
     let cancelled = false
+    setLoading(true)
     ;(async () => {
       try {
         const { resumes, activeId, data } = await db.bootstrap()
@@ -158,15 +184,7 @@ export function ResumeProvider({ children }) {
     return () => {
       cancelled = true
     }
-  }, [])
-
-  // ---- 显式保存（替代自动保存，编辑后需点“保存”才落库）----
-  // 脏标记追踪两类改动：① 各模块内容/顺序/增删；② 全局排版设置(meta)。
-  const [dirty, setDirty] = useState({}) // { [moduleId]: true }
-  const [metaDirty, setMetaDirty] = useState(false)
-  // 仅顺序/模块增删这类结构性变化会令“保存全部”和离开确认生效，但不再把每个老模块标脏。
-  const [orderDirty, setOrderDirty] = useState(false)
-  const savedRef = useRef(null) // { order, modules, meta }
+  }, [user?.id, authLoading])
 
   const snapshot = (s) => ({
     order: s.modules.map((m) => m.id).join('|'),

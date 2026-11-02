@@ -1,14 +1,18 @@
 // 数据库访问层（API 客户端）。
-// 通过 HTTP 调用 Node 后端（server/index.js，底层 node:sqlite），取代旧的 localStorage 方案。
+// 通过 HTTP 调用后端（server/api.js），后端按 Cookie 里的会话隔离数据。
 //
 // 对外接口与旧版保持一致，但全部为异步（返回 Promise）：
 //   defaultMeta / blankResumeData / bootstrap / getList / getResumeData
-//   / saveActive / create / rename / remove
+//   / saveActive / create / rename / remove / copy
+//   以及认证：me / register / login / logout
 // 未来若要换数据库/后端，只要替换本文件内部实现即可，UI 层无需改动。
 
 import { createModule } from '../state/moduleTypes.js'
 
 const BASE = '/api'
+
+// 会话失效时的广播事件：AuthContext 监听后把用户态清空，界面自动回到登录页。
+export const UNAUTHORIZED_EVENT = 'rs:unauthorized'
 
 async function req(path, { method = 'GET', body } = {}) {
   const res = await fetch(BASE + path, {
@@ -28,9 +32,13 @@ async function req(path, { method = 'GET', body } = {}) {
       (payload && (payload.message || payload.error)) ||
         `API ${method} ${path} 失败: ${res.status} ${text}`
     )
-    // 供 UI 区分「重名」等业务错误：err.code === 'duplicate'
+    // 供 UI 区分「重名」「未登录」等业务错误：err.code
     err.status = res.status
     err.code = payload && payload.error
+    // 会话过期 / 被登出：通知全局退回登录页（登录接口自身的 401 不算）
+    if (res.status === 401 && !path.startsWith('/auth/')) {
+      window.dispatchEvent(new CustomEvent(UNAUTHORIZED_EVENT))
+    }
     throw err
   }
   if (res.status === 204) return null
@@ -72,6 +80,34 @@ export function blankResumeData() {
     modules: [createModule('personal')]
   }
 }
+
+/* ---------------- 认证 ---------------- */
+
+// 当前登录用户；未登录返回 null（后端约定此处不返回 401）
+export async function me() {
+  try {
+    const r = await req('/auth/me')
+    return (r && r.user) || null
+  } catch {
+    return null
+  }
+}
+
+export async function register(email, password) {
+  const r = await req('/auth/register', { method: 'POST', body: { email, password } })
+  return r.user
+}
+
+export async function login(email, password) {
+  const r = await req('/auth/login', { method: 'POST', body: { email, password } })
+  return r.user
+}
+
+export async function logout() {
+  await req('/auth/logout', { method: 'POST' })
+}
+
+/* ---------------- 简历 ---------------- */
 
 // 初始化：只拉取列表，不做任何示例数据播种。
 // 库为空时首页展示空状态，由用户自行「新建简历」。

@@ -32,11 +32,20 @@ export default {
       }
     }
 
-    const { status, body: out } = await handleApi({ method: request.method, path, body })
+    // 头部原样传给业务层（需要 cookie 做会话校验）
+    const headers = {}
+    for (const [k, v] of request.headers.entries()) headers[k] = v
+
+    const { status, body: out, headers: outHeaders } = await handleApi({
+      method: request.method,
+      path,
+      body,
+      headers
+    })
 
     return Response.json(out, {
       status,
-      headers: { 'cache-control': 'no-store' }
+      headers: { 'cache-control': 'no-store', ...(outHeaders || {}) }
     })
   }
 }

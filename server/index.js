@@ -28,9 +28,10 @@ const MIME = {
   '.woff': 'font/woff'
 }
 
-function sendJson(res, code, obj) {
+function sendJson(res, code, obj, extraHeaders = null) {
   const body = JSON.stringify(obj)
-  res.writeHead(code, { 'Content-Type': 'application/json; charset=utf-8' })
+  const headers = { 'Content-Type': 'application/json; charset=utf-8', ...(extraHeaders || {}) }
+  res.writeHead(code, headers)
   res.end(body)
 }
 
@@ -86,12 +87,13 @@ const server = createServer(async (req, res) => {
 
   if (url.pathname.startsWith('/api/')) {
     const body = await readBody(req)
-    const { status, body: out } = await handleApi({
+    const { status, body: out, headers } = await handleApi({
       method: req.method,
       path: url.pathname,
-      body
+      body,
+      headers: req.headers
     })
-    return sendJson(res, status, out)
+    return sendJson(res, status, out, headers)
   }
 
   // 非 API：托管静态文件（生产模式下有效）

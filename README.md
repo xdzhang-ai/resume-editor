@@ -38,7 +38,7 @@ npm install
 npm run dev        # 同时启动后端(3001) + 前端(5173)
 ```
 
-浏览器打开 **http://localhost:5173** 即可使用。首次启动会自动建库并播种一份示例简历（「张晓冬」）。
+浏览器打开 **http://localhost:5173** 即可使用。首次启动会自动建库（表结构自动创建），打开后会先看到**登录/注册页**——注册一个账号即可开始。
 
 ## 脚本说明
 
@@ -140,6 +140,7 @@ resume-editor/
 ├── server/
 │   ├── index.js            # 本地/自托管入口：node:http + 托管 dist/
 │   ├── api.js              # 纯业务路由（不依赖 http，本地与 Vercel 共用）
+│   ├── auth.js             # 密码哈希(scrypt) / 会话令牌 / Cookie 工具
 │   ├── db.js               # 存储层：按环境变量选择驱动 + 统一 CRUD（async）
 │   ├── drivers/
 │   │   ├── local.js        # node:sqlite 驱动
@@ -148,8 +149,8 @@ resume-editor/
 ├── src/
 │   ├── main.jsx            # React 入口
 │   ├── App.jsx             # 首页/编辑器切换、保存确认、导出 PDF
-│   ├── components/         # HomePage / EditorPanel / PreviewPanel / SettingsModal ...
-│   ├── state/              # ResumeContext、moduleTypes、sampleData
+│   ├── components/         # AuthPage / HomePage / EditorPanel / PreviewPanel / SettingsModal ...
+│   ├── state/              # AuthContext、ResumeContext、moduleTypes
 │   ├── db/resumeDb.js      # 前端 API 客户端（fetch /api/*）
 │   ├── templates/          # 4 套模板定义
 │   ├── utils/              # markdown.js（渲染器）、paper.js（纸张换算）
@@ -167,19 +168,47 @@ resume-editor/
 | Turso（libSQL） | 设置了 `TURSO_DATABASE_URL` | 云端库，需同时提供 `TURSO_AUTH_TOKEN` |
 
 - 本地库文件被 `.gitignore` 忽略，**不进版本库**；首次运行时若库不存在会自动建表。
-- 库表 `resumes`：`id`（姓名+时间戳）、`name`、`created_at`、`updated_at`、`auto_named`、`data`（JSON：`{ meta, modules }`）。
+- 库表：
+  - `users`：`id`、`email`、`email_key`（小写去空白，唯一）、`password_hash`（scrypt）、`created_at`
+  - `sessions`：`token`（随机串，存 HttpOnly Cookie）、`user_id`、`expires_at`（30 天）
+  - `resumes`：`id`（姓名+时间戳）、`user_id`、`name`、`created_at`、`updated_at`、`auto_named`、`data`（JSON：`{ meta, modules }`）
 - 编辑后需**手动点「保存」**才会持久化；有未保存改动时离开会弹确认框。
 - 前端 `src/db/resumeDb.js` 是 HTTP API 客户端，不直接触碰数据库。
 
+## 账号与数据隔离
+
+- 注册用**邮箱 + 密码**，密码用 `scrypt` 加盐哈希存储，永不回传前端。
+- 登录态是 **HttpOnly Cookie**（`rs_session`，`SameSite=Lax`，HTTPS 下自动加 `Secure`），30 天有效；登出会删除服务端会话记录。
+- **所有简历接口都要求登录**，并按 `user_id` 过滤：看不到、也改不了别人的简历（跨用户访问返回 404）。
+- **简历重名只在同一账号内校验**，不同账号可以同名。
+- 页面未登录时直接呈现登录/注册页；会话过期会自动退回登录页。
+
+### 旧数据认领（加用户体系之前建的简历）
+
+历史记录的 `user_id` 为 `NULL`，不会出现在任何账号下。先注册账号，再执行：
+
+```bash
+node scripts/claim-orphans.mjs                      # 只列出无主简历
+node scripts/claim-orphans.mjs you@example.com      # 归属到该账号
+```
+
+脚本与服务端共用 `server/db.js`，因此同样跟随 `TURSO_DATABASE_URL` / `RESUME_DB`。
+
 ### REST API（前缀 `/api`）
 
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET | `/api/health` | 健康检查 |
-| GET / POST | `/api/resumes` | 列出 / 新建简历 |
-| GET / PUT / DELETE | `/api/resumes/:id` | 读取 / 更新 / 删除 |
-| POST | `/api/resumes/:id/copy` | 拷贝 |
-| PUT | `/api/resumes/:id/rename` | 重命名 |
+| 方法 | 路径 | 鉴权 | 说明 |
+|------|------|------|------|
+| GET | `/api/health` | 否 | 健康检查 |
+| POST | `/api/auth/register` | 否 | 注册并自动登录（`{email,password}`） |
+| POST | `/api/auth/login` | 否 | 登录（`{email,password}`） |
+| POST | `/api/auth/logout` | 否 | 登出，清除 Cookie |
+| GET | `/api/auth/me` | 否 | 当前用户，未登录返回 `{user:null}` |
+| GET / POST | `/api/resumes` | 是 | 列出 / 新建简历 |
+| GET / PUT / DELETE | `/api/resumes/:id` | 是 | 读取 / 更新 / 删除 |
+| POST | `/api/resumes/:id/copy` | 是 | 拷贝 |
+| PUT | `/api/resumes/:id/rename` | 是 | 重命名 |
+
+未登录访问简历接口返回 `401 {error:"unauthorized"}`。
 
 ## 配置（环境变量）
 
@@ -192,6 +221,6 @@ resume-editor/
 
 ## 注意事项
 
-- **`npm run dev:web` 单独用会失败**：它只起前端，没有后端响应 `/api`，首页会提示「无法连接本地后端服务」。开发务必用 `npm run dev`。
+- **`npm run dev:web` 单独用会失败**：它只起前端，没有后端响应 `/api`，首页会提示「无法连接数据服务」。开发务必用 `npm run dev`。
 - **手动保存**：编辑器不是自动保存，记得点「保存」。
 - **不要删除 `src/utils/markdown.js` 中的 NUL（`\0`）字节**：它们是行内代码占位哨兵（用户文本不可能含 NUL，用于安全防护），删除会破坏渲染器。

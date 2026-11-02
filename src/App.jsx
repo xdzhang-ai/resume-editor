@@ -5,7 +5,9 @@ import SettingsModal from './components/SettingsModal.jsx'
 import ResumeBar from './components/ResumeBar.jsx'
 import HomePage from './components/HomePage.jsx'
 import NameDialog from './components/NameDialog.jsx'
+import AuthPage from './components/AuthPage.jsx'
 import { useResume } from './state/ResumeContext.jsx'
+import { useAuth } from './state/AuthContext.jsx'
 
 // 生成一个不与现有简历重名的默认名称（如「未命名」已被占用 → 「未命名 2」）。
 function suggestName(base, names) {
@@ -31,6 +33,7 @@ export default function App() {
     resumes,
     activeId
   } = useResume()
+  const { user, loading: authLoading, logout } = useAuth()
   const [view, setView] = useState('home') // 'home' | 'editor'
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [leaveModal, setLeaveModal] = useState(false) // 未保存离开确认
@@ -166,6 +169,34 @@ export default function App() {
     }
   }, [resumes, activeId])
 
+  // 退出登录：有未保存改动先确认（登出后本地编辑会丢弃）。
+  const handleLogout = useCallback(async () => {
+    if (
+      anyDirty &&
+      !window.confirm('当前简历有未保存的修改，退出登录后这些改动会丢失。确定退出？')
+    ) {
+      return
+    }
+    await logout()
+    setView('home')
+  }, [anyDirty, logout])
+
+  // 鉴权门：会话加载中显示占位，未登录先呈现登录/注册页
+  if (authLoading) {
+    return (
+      <div className="auth-splash">
+        <span>加载中…</span>
+      </div>
+    )
+  }
+  if (!user) {
+    return (
+      <div className="app">
+        <AuthPage />
+      </div>
+    )
+  }
+
   return (
     <div className="app">
       <header className="topbar">
@@ -202,6 +233,14 @@ export default function App() {
               </button>
             </>
           )}
+          <div className="user-chip">
+            <span className="user-email" title={user.email}>
+              {user.email}
+            </span>
+            <button className="btn ghost" onClick={handleLogout}>
+              退出
+            </button>
+          </div>
         </div>
       </header>
 
