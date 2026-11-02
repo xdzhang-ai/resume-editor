@@ -53,10 +53,10 @@ export default function HomePage({ onOpen, onCreate, onCopy }) {
     return (
       <div className="home">
         <div className="home-error">
-          <p>无法连接本地后端服务。</p>
+          <p>无法连接数据服务。</p>
           <p className="home-error-detail">{error}</p>
           <p className="home-error-detail">
-            请确认已通过 <code>npm run dev</code> 启动（该命令会同时拉起 Node 后端）。
+            请确认后端服务已启动（本地开发可运行 <code>npm run dev</code>）。
           </p>
         </div>
       </div>
@@ -69,9 +69,7 @@ export default function HomePage({ onOpen, onCreate, onCopy }) {
         <div className="home-head">
           <div>
             <h1 className="home-title">我的简历</h1>
-            <p className="home-sub">
-              共 {resumes.length} 份 · 数据保存在本地 SQLite 数据库（server/data/resume.db）
-            </p>
+            <p className="home-sub">共 {resumes.length} 份</p>
           </div>
         </div>
 
