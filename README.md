@@ -71,6 +71,12 @@ npm run start      # 同一服务在 3001 同时托管前端与 API
 > **注意分支**：按钮指向 `vercel` 分支（内容与 `feat/vercel-turso` 同步）。`main` 分支是纯本地 SQLite 版本，没有 `api/` 和 `vercel.json`，**不能直接部署到 Vercel**（会得到一个接口全 404 的站点）。
 >
 > 为什么不直接写 `feat/vercel-turso`？Vercel 的 Deploy Button 会把 `tree/` 之后的第一段当成分支名、其余当成子目录。分支名里带 `/` 就会被切成「分支 `feat` + 目录 `vercel-turso`」，那个分支并不存在，于是报 `The repository used by this template is private or does not exist`。所以单开了一个不带斜杠的 `vercel` 分支，专门给按钮用。
+>
+> 同步命令（把 `vercel` 快进到 `feat/vercel-turso` 的最新提交）：
+>
+> ```bash
+> git push origin feat/vercel-turso:vercel
+> ```
 
 部署前需要准备一个 Turso 数据库（[Vercel Marketplace 一键开通](https://vercel.com/marketplace/tursocloud/database)，或用 `turso db create` 建库），把 `TURSO_DATABASE_URL` / `TURSO_AUTH_TOKEN` 填进表单。**不填也能构建成功，但所有接口会返回 500**——因为 Serverless 的文件系统只读，本地 SQLite 驱动写不进去。
 
