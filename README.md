@@ -64,7 +64,7 @@ npm run start      # 同一服务在 3001 同时托管前端与 API
 
 ### Vercel 一键部署
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fxdzhang-ai%2Fresume-editor%2Ftree%2Fvercel&project-name=resume-editor&repository-name=resume-editor&env=TURSO_DATABASE_URL%2CTURSO_AUTH_TOKEN&envDescription=%E5%9C%A8%20Turso%20%E5%88%9B%E5%BB%BA%E6%95%B0%E6%8D%AE%E5%BA%93%E5%90%8E%EF%BC%8C%E7%B2%98%E8%B4%B4%E6%95%B0%E6%8D%AE%E5%BA%93%E5%9C%B0%E5%9D%80%EF%BC%88libsql%3A%2F%2F%20%E5%BC%80%E5%A4%B4%EF%BC%89%E4%B8%8E%E8%AE%BF%E9%97%AE%E4%BB%A4%E7%89%8C&envLink=https%3A%2F%2Fvercel.com%2Fmarketplace%2Ftursocloud%2Fdatabase)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fxdzhang-ai%2Fresume-editor%2Ftree%2Fvercel&project-name=resume-editor&repository-name=resume-editor-app&env=TURSO_DATABASE_URL%2CTURSO_AUTH_TOKEN&envDescription=%E5%9C%A8%20Turso%20%E5%88%9B%E5%BB%BA%E6%95%B0%E6%8D%AE%E5%BA%93%E5%90%8E%EF%BC%8C%E7%B2%98%E8%B4%B4%E6%95%B0%E6%8D%AE%E5%BA%93%E5%9C%B0%E5%9D%80%EF%BC%88libsql%3A%2F%2F%20%E5%BC%80%E5%A4%B4%EF%BC%89%E4%B8%8E%E8%AE%BF%E9%97%AE%E4%BB%A4%E7%89%8C&envLink=https%3A%2F%2Fvercel.com%2Fmarketplace%2Ftursocloud%2Fdatabase)
 
 点按钮之后会发生四件事：Fork 本仓库到你自己的 GitHub 账号 → 新建一个 Vercel 项目 → 表单里填两个环境变量 → 自动构建并上线。
 
